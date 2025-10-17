@@ -3,5 +3,8 @@ from django.views.generic import TemplateView
 
 
 class HomeView(TemplateView):
-    template_name = "facts/home.html"
+    template_name = "facts/index.html"
 
+
+class TextAnalyze(TemplateView):
+    template_name = "facts/analyze.html"

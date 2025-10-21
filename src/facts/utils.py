@@ -1,4 +1,4 @@
-import joblib
+from django.db.models.fields import return_None
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
 import nltk
@@ -7,42 +7,62 @@ from nltk.corpus import cmudict
 import textstat
 from nltk import pos_tag
 import numpy as np
+from tensorflow.keras.models import load_model
+import os
+from django.conf import settings
+from keras.models import load_model
+
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(CURRENT_DIR, "model", "text_complexity_model.keras")
+MODEL = load_model(MODEL_PATH)
+MODEL.predict(np.zeros((1, 12)))
 
 
 class LinguisticMetrics:
     def __init__(self, text):
         self.text = text
+        self.words = word_tokenize(self.text.lower())
+        self.sentences = sent_tokenize(self.text)
+
+    def total_words(self):
+        #words = word_tokenize(self.text)
+        total_words = len(self.words)
+
+        return total_words
+
+    def total_sen(self):
+        total_sentences = len(self.sentences)
+
+        return total_sentences
 
     def average_sen_len(self):
-        sentences = sent_tokenize(self.text)
         total_words = 0
-        total_sentences = len(sentences)
+        total_sentences = len(self.sentences)
 
-        for sentence in sentences:
+        for sentence in self.sentences:
             words = word_tokenize(sentence)
             total_words += len(words)
 
         return total_words / total_sentences
 
     def average_word_len(self):
-        words = word_tokenize(self.text)
         total_length = 0
-        total_words = len(words)
+        total_words = len(self.words)
 
-        for word in words:
+        for word in self.words:
             total_length += len(word)
 
         return total_length / total_words
 
     def word_sentence_diff(self):
-        total_words = len(word_tokenize(self.text))
-        total_sentences = len(sent_tokenize(self.text))
+        total_words = len(self.words)
+        total_sentences = len(self.sentences)
 
         return total_words / total_sentences
 
     def vocabulary_richness(self):
-        words = word_tokenize(self.text.lower())
-        words = [word for word in words if word.isalpha()]
+        words = [word for word in self.words if word.isalpha()]
 
         if len(words) == 0:
             return 0
@@ -150,20 +170,58 @@ class LinguisticMetrics:
         punct_marks = len(re.findall(r'[.,;:!?\-—()"\'/]', self.text))
         return punct_marks / len(self.text) if self.text else 0
 
+
+
     def get_all_metrics(self):
         """
         Returns all metrics for text
         """
+        pos = self.get_pos_ratios()
         metrics = [self.average_sen_len(), self.average_word_len(), self.word_sentence_diff(),
                 self.vocabulary_richness(), self.syllables_per_word_cmu(),
+                pos[0], pos[1], pos[2],
                 self.complex_conjunctions_freq(), self.punctuation_density(),
-                textstat.flesch_reading_ease(self.text) ,textstat.dale_chall_readability_score(self.text)]
+                textstat.flesch_reading_ease(self.text) ,textstat.dale_chall_readability_score(self.text),
+                ]
+
+        #textstat.smog_index(self.text), textstat.automated_readability_index(self.text),
+        #        textstat.coleman_liau_index(self.text), textstat.gunning_fog(self.text),
+
         return [round(x, 2) for x in metrics]
 
 
-X_test = [18.54545455, 3.990196078, 18.54545455,
-          0.576271186, 1.314917127, 0.265536723,
-          0.192090395, 0.062146893, 0, 0.027217742,
-          79.25114271, 8.148543474]
-rf_loaded = joblib.load("random_forest_model.pkl")
-y_pred = rf_loaded.predict(X_test)
+class NNPredict:
+    def __init__(self, text):
+        self.target = 0
+        self.text = text
+
+    def __predict(self):
+        metrics = LinguisticMetrics(self.text).get_all_metrics()
+        x_test = np.array(metrics)
+        x_test = x_test.reshape(1, -1)
+
+        self.target = MODEL.predict(x_test)
+
+    def predict_level(self):
+        self.__predict()
+
+        if self.target > 0:
+            return "very_easy"
+        elif self.target > -0.5:
+            return "easy"
+        elif self.target > -1.5:
+            return "medium"
+        else:
+            return "hard"
+
+
+def run_readability_analysis(text_content):
+    model = NNPredict(text_content)
+    metrics = LinguisticMetrics(text_content)
+    result = [model.predict_level(), metrics.total_words(), metrics.total_sen(), ]
+    metrics = metrics.get_all_metrics()
+
+    for metric in metrics:
+        result.append(metric)
+
+    return result

@@ -7,5 +7,5 @@ app_name = 'facts'
 
 urlpatterns = [
     path('', views.HomeView.as_view(), name="home"),
-    path('analyze/', views.TextAnalyze.as_view(), name="analyze")
+    path('analyze/', views.AnalyzeView.as_view(), name="analyze")
     ]

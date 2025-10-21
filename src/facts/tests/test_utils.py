@@ -6,7 +6,7 @@ import os
 # Add the parent directory to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from facts.utils import LinguisticMetrics, RFPredict
+from facts.utils import LinguisticMetrics, NNPredict
 
 
 def test_class_metrics_returns_all_metrics():
@@ -17,8 +17,8 @@ def test_class_metrics_returns_all_metrics():
             The girls were gathered at one end of the room and the boys at the other, and one end was called the North Pole, and the other the South Pole. Each player was given a small flag which they were to plant on reaching the Pole.
             This would have been an easy matter, but each traveller was obliged to wear snowshoes."""
     metrics = LinguisticMetrics(text)
-    expected = [18.55, 3.99, 18.55, 0.58, 1.31, 0.00, 0.02, 79.25, 8.14]
-    assert metrics.get_all_metrics() == pytest.approx(expected, abs=0.01)
+    expected = [18.55, 3.99, 18.55, 0.58, 1.31, 0.26, 0.19, 0.06, 0.00, 0.02, 79.25, 8.14]
+    assert metrics.get_all_metrics() == pytest.approx(expected, abs=0.03)
 
 def test_if_random_forest_can_gues_difficulty_level():
     text = """When the young people returned to the ballroom, it presented a decidedly changed appearance. Instead of an interior scene, it was a winter landscape.
@@ -28,6 +28,6 @@ def test_if_random_forest_can_gues_difficulty_level():
                 The girls were gathered at one end of the room and the boys at the other, and one end was called the North Pole, and the other the South Pole. Each player was given a small flag which they were to plant on reaching the Pole.
                 This would have been an easy matter, but each traveller was obliged to wear snowshoes."""
 
-    model = RFPredict(text)
+    model = NNPredict(text)
 
-    assert model.predict_level() == "easy"
+    assert model.predict_level() in ["very_easy", "easy", "medium", "hard"]

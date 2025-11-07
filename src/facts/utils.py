@@ -11,13 +11,22 @@ from tensorflow.keras.models import load_model
 import os
 from django.conf import settings
 from keras.models import load_model
+import joblib
 
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(CURRENT_DIR, "model", "text_complexity_model.keras")
-MODEL = load_model(MODEL_PATH)
-MODEL.predict(np.zeros((1, 12)))
+MODEL_DIR = os.path.join(CURRENT_DIR, "model")
 
+MODEL_PATH = os.path.join(MODEL_DIR, "text_complexity_model.keras")
+SCALER_X_PATH = os.path.join(MODEL_DIR, "scaler_X.pkl")
+SCALER_Y_PATH = os.path.join(MODEL_DIR, "scaler_y.pkl")
+
+MODEL = load_model(MODEL_PATH)
+SCALER_X = joblib.load(SCALER_X_PATH)
+SCALER_Y = joblib.load(SCALER_Y_PATH)
+
+# Test to ensure it runs
+MODEL.predict(np.zeros((1, 16)))
 
 class LinguisticMetrics:
     def __init__(self, text):
@@ -182,10 +191,9 @@ class LinguisticMetrics:
                 pos[0], pos[1], pos[2],
                 self.complex_conjunctions_freq(), self.punctuation_density(),
                 textstat.flesch_reading_ease(self.text) ,textstat.dale_chall_readability_score(self.text),
+                textstat.smog_index(self.text), textstat.automated_readability_index(self.text),
+                textstat.coleman_liau_index(self.text), textstat.gunning_fog(self.text),
                 ]
-
-        #textstat.smog_index(self.text), textstat.automated_readability_index(self.text),
-        #        textstat.coleman_liau_index(self.text), textstat.gunning_fog(self.text),
 
         return [round(x, 2) for x in metrics]
 
@@ -197,19 +205,22 @@ class NNPredict:
 
     def __predict(self):
         metrics = LinguisticMetrics(self.text).get_all_metrics()
-        x_test = np.array(metrics)
-        x_test = x_test.reshape(1, -1)
 
-        self.target = MODEL.predict(x_test)
+        x_predict = np.array(metrics)
+        x_predict = x_predict.reshape(1, -1)
+        x_predict = SCALER_X.fit_transform(x_predict)
 
+        self.target = SCALER_Y.inverse_transform(MODEL.predict(x_predict))
+        print(self.target)
     def predict_level(self):
         self.__predict()
 
-        if self.target > 0:
+        lexile = self.target  # e.g., 750, 950, etc.
+        if lexile < 500:
             return "very_easy"
-        elif self.target > -0.5:
+        elif lexile < 800:
             return "easy"
-        elif self.target > -1.5:
+        elif lexile < 1100:
             return "medium"
         else:
             return "hard"
@@ -223,5 +234,5 @@ def run_readability_analysis(text_content):
 
     for metric in metrics:
         result.append(metric)
-
+    print(result)
     return result

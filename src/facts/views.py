@@ -10,6 +10,23 @@ from facts.models import Data
 class HomeView(TemplateView):
     template_name = "facts/index.html"
 
+class FeaturesView(TemplateView):
+    template_name = "facts/features.html"
+
+class SupportView(TemplateView):
+    template_name = "facts/support.html"
+
+class DocumentationView(TemplateView):
+    template_name = "facts/documentation.html"
+
+class AboutView(TemplateView):
+    template_name = "facts/about.html"
+
+class ContactView(TemplateView):
+    template_name = "facts/contact.html"
+
+class PrivacyView(TemplateView):
+    template_name = "facts/privacy.html"
 
 class AnalyzeView(View):
     template_name = "facts/analyze.html"

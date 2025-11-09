@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navbar %}
+<nav class="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <a href="{% url 'facts:home' %}" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open h-6 w-6 text-primary">
+                <path d="M12 7v14" />
+                <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+            </svg>
+            <span class="text-primary font-semibold">ReadScore</span>
+        </a>
+        <a href="{% url 'facts:home' %}" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all border bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">Back to Home</a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<main class="container mx-auto px-4 py-12">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold mb-4">Privacy Policy</h1>
+            <p class="text-muted-foreground text-lg">How we protect and handle your data</p>
+        </div>
+
+        <!-- Privacy Content -->
+        <div class="space-y-8">
+            <!-- Introduction -->
+            <section class="bg-card rounded-xl border p-8">
+                <h2 class="text-2xl font-bold mb-4">Introduction</h2>
+                <p class="text-muted-foreground">At ReadScore, we are committed to protecting your privacy and ensuring the security of your data. This Privacy Policy explains how we collect, use, and safeguard your information when you use our text analysis services.</p>
+            </section>
+
+            <!-- Data Collection -->
+            <section class="bg-card rounded-xl border p-8">
+                <h2 class="text-2xl font-bold mb-4">Information We Collect</h2>
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-semibold">Text Content</h3>
+                        <p class="text-muted-foreground">When you use ReadScore to analyze text, we process the content you provide solely for the purpose of generating readability scores and linguistic analysis. Your text is processed in real-time and is not stored permanently on our servers.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-semibold">Usage Information</h3>
+                        <p class="text-muted-foreground">We may collect anonymous usage data to improve our services, including:</p>
+                        <ul class="text-muted-foreground space-y-1 ml-6 list-disc">
+                            <li>Analysis request frequency</li>
+                            <li>Feature usage patterns</li>
+                            <li>Performance metrics</li>
+                            <li>Error reports</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Usage -->
+            <section class="bg-card rounded-xl border p-8">
+                <h2 class="text-2xl font-bold mb-4">How We Use Your Information</h2>
+                <div class="space-y-3">
+                    <p class="text-muted-foreground">We use the information we collect to:</p>
+                    <ul class="text-muted-foreground space-y-2 ml-6 list-disc">
+                        <li>Provide text readability analysis services</li>
+                        <li>Improve and optimize our algorithms</li>
+                        <li>Enhance user experience and service performance</li>
+                        <li>Ensure the security and reliability of our platform</li>
+                        <li>Develop new features and functionality</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Data Protection -->
+            <section class="bg-card rounded-xl border p-8">
+                <h2 class="text-2xl font-bold mb-4">Data Protection & Security</h2>
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-semibold">Security Measures</h3>
+                        <p class="text-muted-foreground">We implement appropriate technical and organizational security measures to protect your data against unauthorized access, alteration, disclosure, or destruction.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-semibold">Data Retention</h3>
+                        <p class="text-muted-foreground">Text content submitted for analysis is processed in memory and is not persistently stored. Anonymous usage data may be retained for service improvement purposes.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Third Parties -->
+            <section class="bg-card rounded-xl border p-8">
+                <h2 class="text-2xl font-bold mb-4">Third-Party Services</h2>
+                <p class="text-muted-foreground">We do not share your text content with third parties. Our service may use trusted third-party services for infrastructure and analytics, but these services only receive anonymous, aggregated data.</p>
+            </section>
+
+            <!-- Your Rights -->
+            <section class="bg-card rounded-xl border p-8">
+                <h2 class="text-2xl font-bold mb-4">Your Rights</h2>
+                <div class="space-y-3">
+                    <p class="text-muted-foreground">You have the right to:</p>
+                    <ul class="text-muted-foreground space-y-2 ml-6 list-disc">
+                        <li>Access information about how your data is processed</li>
+                        <li>Request deletion of any stored data</li>
+                        <li>Opt-out of non-essential data collection</li>
+                        <li>Ask questions about our privacy practices</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Updates -->
+            <section class="bg-card rounded-xl border p-8">
+                <h2 class="text-2xl font-bold mb-4">Policy Updates</h2>
+                <p class="text-muted-foreground">We may update this Privacy Policy from time to time. We will notify users of any material changes by posting the new policy on this page and updating the effective date.</p>
+            </section>
+
+            <!-- Contact -->
+            <section class="bg-accent/5 rounded-xl border border-accent/20 p-8 text-center">
+                <h2 class="text-2xl font-bold mb-4">Questions?</h2>
+                <p class="text-muted-foreground mb-6">If you have any questions about our Privacy Policy or data practices, please contact us.</p>
+                <a href="{% url 'facts:contact' %}" class="inline-flex items-center justify-center gap-2 text-sm font-medium transition-all bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-6">
+                    Contact Us
+                </a>
+            </section>
+        </div>
+    </div>
+</main>
+{% endblock %}

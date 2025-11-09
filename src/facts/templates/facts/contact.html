@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navbar %}
+<nav class="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <a href="{% url 'facts:home' %}" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open h-6 w-6 text-primary">
+                <path d="M12 7v14" />
+                <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+            </svg>
+            <span class="text-primary font-semibold">ReadScore</span>
+        </a>
+        <a href="{% url 'facts:home' %}" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all border bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">Back to Home</a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<main class="container mx-auto px-4 py-12">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold mb-4">Contact Us</h1>
+            <p class="text-muted-foreground text-lg">Get in touch with our team - we'd love to hear from you</p>
+        </div>
+
+        <!-- Contact Methods -->
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+            <div class="bg-card rounded-xl border p-6 text-center">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Email Us</h3>
+                <p class="text-muted-foreground mb-4">Send us an email and we'll get back to you as soon as possible.</p>
+                <a href="mailto:hello@readscore.com" class="inline-flex items-center justify-center gap-2 text-sm font-medium transition-all bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-4">hello@readscore.com</a>
+            </div>
+
+            <div class="bg-card rounded-xl border p-6 text-center">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Support</h3>
+                <p class="text-muted-foreground mb-4">Need help with ReadScore? Our support team is here to assist you.</p>
+                <a href="mailto:support@readscore.com" class="inline-flex items-center justify-center gap-2 text-sm font-medium transition-all bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-4">support@readscore.com</a>
+            </div>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="text-center mt-8">
+            <p class="text-muted-foreground">We typically respond to all inquiries within 24 hours during business days.</p>
+        </div>
+    </div>
+</main>
+{% endblock %}

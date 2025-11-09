@@ -27,20 +27,18 @@
     <div class="grid lg:grid-cols-2 gap-12 items-center">
       <div class="space-y-6">
         <span class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit bg-accent/10 text-accent border-accent/20">AI-Powered Analysis</span>
-        <h1 class="text-4xl md:text-5xl font-bold">Predict Book Readability with Precision</h1>
-        <p class="text-muted-foreground text-lg">Analyze any book and get instant readability scores. Our advanced AI helps authors, educators, and publishers understand how easy their content is to read.</p>
-        <a href="{% url 'facts:analyze' %}" class="inline-flex items-center justify-center gap-2 text-sm font-medium transition-all text-primary-foreground h-10 rounded-md px-6 bg-primary hover:bg-primary/90">Analyze a Book</a>
+        <h1 class="text-4xl md:text-5xl font-bold">Predict Text Readability with Precision</h1>
+        <p class="text-muted-foreground text-lg">Analyze any text and get instant readability scores. Our advanced AI helps authors, educators, and publishers understand how easy their content is to read.</p>
+        <a href="{% url 'facts:analyze' %}" class="inline-flex items-center justify-center gap-2 text-sm font-medium transition-all text-primary-foreground h-10 rounded-md px-6 bg-primary hover:bg-primary/90">Analyze a Text</a>
       </div>
       <div class="relative">
         <div class="absolute inset-0 bg-gradient-to-br from-accent/20 to-primary/20 rounded-lg blur-3xl"></div>
-        <div class="relative rounded-lg shadow-2xl w-full h-64 md:h-80 bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open text-primary">
-            <path d="M12 7v14" />
-            <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
-          </svg>
+        <div class="relative rounded-lg shadow-2xl w-full h-64 md:h-80 bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center overflow-hidden">
+          <img src="{% static 'images/main_idea.webp' %}" alt="main_idea_image" class="w-full h-full object-cover rounded-lg" />
         </div>
       </div>
-    </div>
+</div>
+
   </section>
 
   <!-- Features Section -->
@@ -104,11 +102,11 @@
         <div class="text-center">
           <div class="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4">1</div>
           <h3 class="text-xl font-semibold mb-2">Upload Your Text</h3>
-          <p class="text-muted-foreground">Paste your book excerpt or upload a file in various formats.</p>
+          <p class="text-muted-foreground">Paste your text excerpt or upload a file in various formats.</p>
         </div>
 
         <div class="text-center">
-          <div class="w-16 h-16 rounded-full bg-accent text-accent-foreground flex items-center justify-center mx-auto mb-4">2</div>
+          <div class="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4">2</div>
           <h3 class="text-xl font-semibold mb-2">AI Analysis</h3>
           <p class="text-muted-foreground">Our algorithms analyze vocabulary, sentence structure, and complexity.</p>
         </div>
@@ -125,7 +123,7 @@
   <!-- Call to Action -->
   <section class="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground py-20 text-center">
     <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold mb-4">Ready to Analyze Your Book?</h2>
+      <h2 class="text-3xl font-bold mb-4">Ready to Analyze Your Text?</h2>
       <p class="text-primary-foreground/90 max-w-2xl mx-auto mb-8">Join thousands of authors and educators who trust ReadScore for accurate readability analysis.</p>
       <a href="{% url 'facts:analyze' %}" class="inline-flex items-center justify-center gap-2 text-sm font-medium transition-all bg-white text-primary hover:bg-white/90 h-10 rounded-md px-6">Start Your Free Analysis</a>
     </div>
@@ -152,8 +150,7 @@
         <div>
           <h4 class="font-semibold mb-4">Product</h4>
           <ul class="space-y-2 text-muted-foreground">
-            <li><a href="#features" class="hover:text-foreground transition-colors">Features</a></li>
-            <li><a href="#" class="hover:text-foreground transition-colors">Pricing</a></li>
+            <li><a href="{% url 'facts:features' %}" class="hover:text-foreground transition-colors">Features</a></li>
             <li><a href="#" class="hover:text-foreground transition-colors">API</a></li>
           </ul>
         </div>
@@ -161,18 +158,17 @@
         <div>
           <h4 class="font-semibold mb-4">Resources</h4>
           <ul class="space-y-2 text-muted-foreground">
-            <li><a href="#" class="hover:text-foreground transition-colors">Documentation</a></li>
-            <li><a href="#" class="hover:text-foreground transition-colors">Blog</a></li>
-            <li><a href="#" class="hover:text-foreground transition-colors">Support</a></li>
+            <li><a href="{% url 'facts:documentation' %}" class="hover:text-foreground transition-colors">Documentation</a></li>
+            <li><a href="{% url 'facts:support' %}" class="hover:text-foreground transition-colors">Support</a></li>
           </ul>
         </div>
 
         <div>
           <h4 class="font-semibold mb-4">Company</h4>
           <ul class="space-y-2 text-muted-foreground">
-            <li><a href="#" class="hover:text-foreground transition-colors">About</a></li>
-            <li><a href="#" class="hover:text-foreground transition-colors">Contact</a></li>
-            <li><a href="#" class="hover:text-foreground transition-colors">Privacy</a></li>
+            <li><a href="{% url 'facts:about' %}" class="hover:text-foreground transition-colors">About</a></li>
+            <li><a href="{% url 'facts:contact' %}" class="hover:text-foreground transition-colors">Contact</a></li>
+            <li><a href="{% url 'facts:privacy' %}" class="hover:text-foreground transition-colors">Privacy</a></li>
           </ul>
         </div>
       </div>

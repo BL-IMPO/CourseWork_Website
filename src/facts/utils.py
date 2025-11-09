@@ -20,10 +20,14 @@ MODEL_DIR = os.path.join(CURRENT_DIR, "model")
 MODEL_PATH = os.path.join(MODEL_DIR, "text_complexity_model.keras")
 SCALER_X_PATH = os.path.join(MODEL_DIR, "scaler_X.pkl")
 SCALER_Y_PATH = os.path.join(MODEL_DIR, "scaler_y.pkl")
+DALE_PATH = os.path.join(CURRENT_DIR, "dale.txt")
 
 MODEL = load_model(MODEL_PATH)
 SCALER_X = joblib.load(SCALER_X_PATH)
 SCALER_Y = joblib.load(SCALER_Y_PATH)
+
+with open(DALE_PATH, "r") as f:
+    DALE = f.readlines()
 
 # Test to ensure it runs
 MODEL.predict(np.zeros((1, 16)))
@@ -180,6 +184,110 @@ class LinguisticMetrics:
         return punct_marks / len(self.text) if self.text else 0
 
 
+    def flesch_reading_ease(self):
+        return 206.835 - 1.015 * self.average_sen_len() - 84.6 * self.syllables_per_word_cmu()
+
+    def dale_chall_readability_score(self):
+
+        difficult_words = 0
+
+        for word in self.words:
+            if word in DALE:
+                difficult_words += 1
+
+        diff_to_normal_words = (difficult_words / len(self.words))  * 100
+
+        dale_score = 0.1579 * diff_to_normal_words + 0.0496 * self.word_sentence_diff()
+
+        if diff_to_normal_words > 5:
+            dale_score += 3.6365
+
+        return dale_score
+
+    def smog_index(self):
+
+        if len(self.sentences) == 0:
+            return 0
+
+        # Count polysyllabic words (words with 3 or more syllables)
+        polysyllabic_count = 0
+
+        for sentence in self.sentences:
+            words = word_tokenize(sentence)
+            for word in words:
+                # Clean the word - keep only alphabetic characters
+                clean_word = re.sub(r'[^a-zA-Z]', '', word).lower()
+                if len(clean_word) > 0:
+                    syllable_count = self.count_syllables_cmu(clean_word)
+                    if syllable_count >= 3:
+                        polysyllabic_count += 1
+
+        # Apply SMOG formula
+        sentences_count = min(len(self.sentences), 30)  # SMOG uses exactly 30 sentences
+        if polysyllabic_count == 0:
+            return 0
+
+        smog_score = 1.043 * (polysyllabic_count * (30 / sentences_count)) ** 0.5 + 3.1291
+        return round(smog_score, 2)
+
+    def automated_readability_index(self):
+        if len(self.words) == 0 or len(self.sentences) == 0:
+            return 0
+
+        # Count total characters (letters only, excluding punctuation and spaces)
+        total_characters = 0
+        for word in self.words:
+            # Count only alphabetic characters in each word
+            total_characters += len(re.findall(r'[a-zA-Z]', word))
+
+        # Calculate ratios
+        characters_per_word = total_characters / len(self.words)
+        words_per_sentence = len(self.words) / len(self.sentences)
+
+        # Apply ARI formula
+        ari_score = (4.71 * characters_per_word) + (0.5 * words_per_sentence) - 21.43
+        return round(ari_score, 2)
+
+    def coleman_liau_index(self):
+        if len(self.words) == 0:
+            return 0
+
+        # Count total characters (letters only, excluding punctuation and spaces)
+        total_characters = 0
+        for word in self.words:
+            # Count only alphabetic characters in each word
+            total_characters += len(re.findall(r'[a-zA-Z]', word))
+
+        # Calculate metrics per 100 words
+        characters_per_100_words = (total_characters / len(self.words)) * 100
+        sentences_per_100_words = (len(self.sentences) / len(self.words)) * 100
+
+        # Apply Coleman-Liau formula
+        coleman_liau_score = (0.0588 * characters_per_100_words) - (0.296 * sentences_per_100_words) - 15.8
+        return round(coleman_liau_score, 2)
+
+    def gunning_fog_index(self):
+        if len(self.words) == 0 or len(self.sentences) == 0:
+            return 0
+
+        # Count complex words (words with 3 or more syllables)
+        complex_word_count = 0
+        words = [word for word in self.words if word.isalpha()]
+
+        for word in words:
+            # Skip common exceptions: proper nouns (capitalized), familiar jargon, etc.
+            # For simplicity, we'll count all words with 3+ syllables as complex
+            syllable_count = self.count_syllables_cmu(word)
+            if syllable_count >= 3:
+                complex_word_count += 1
+
+        # Calculate ratios
+        words_per_sentence = len(words) / len(self.sentences)
+        complex_word_percentage = (complex_word_count / len(words)) * 100 if len(words) > 0 else 0
+
+        # Apply Gunning Fog formula
+        fog_index = 0.4 * (words_per_sentence + complex_word_percentage)
+        return round(fog_index, 2)
 
     def get_all_metrics(self):
         """
@@ -190,9 +298,9 @@ class LinguisticMetrics:
                 self.vocabulary_richness(), self.syllables_per_word_cmu(),
                 pos[0], pos[1], pos[2],
                 self.complex_conjunctions_freq(), self.punctuation_density(),
-                textstat.flesch_reading_ease(self.text) ,textstat.dale_chall_readability_score(self.text),
-                textstat.smog_index(self.text), textstat.automated_readability_index(self.text),
-                textstat.coleman_liau_index(self.text), textstat.gunning_fog(self.text),
+                self.flesch_reading_ease() ,self.dale_chall_readability_score(),
+                self.smog_index(), self.automated_readability_index(),
+                self.coleman_liau_index(), self.gunning_fog_index(),
                 ]
 
         return [round(x, 2) for x in metrics]

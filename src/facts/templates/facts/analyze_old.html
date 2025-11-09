@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navbar %}
+  <!-- Navigation -->
+  <nav class="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="{% url 'facts:home' %}" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open h-6 w-6 text-primary">
+          <path d="M12 7v14" />
+          <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+        </svg>
+        <span class="text-primary font-semibold">ReadScore</span>
+      </a>
+      <a href="{% url 'facts:home' %}" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all border bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">Back to Home</a>
+    </div>
+  </nav>
+
+{% endblock %}
+
+{% block content %}
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-12">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold mb-4">Analyze Your Book</h1>
+        <p class="text-muted-foreground">Paste your text below to get instant readability scores and insights</p>
+      </div>
+
+      <!-- Tabs -->
+      <!-- Tabs -->
+<div class="tabs-container mb-8">
+  <div role="tablist" class="bg-muted text-muted-foreground h-9 flex rounded-xl p-[3px]">
+    <button type="button" role="tab" id="paste-tab" class="tab-trigger active" data-target="paste-content">Paste Text</button>
+    <button type="button" role="tab" id="upload-tab" class="tab-trigger" data-target="upload-content">Upload File</button>
+  </div>
+
+  <!-- Form that submits to your Django view -->
+  <form method="post" enctype="multipart/form-data" id="analysis-form">
+    {% csrf_token %}
+
+    <!-- Paste Text Tab -->
+    <section id="paste-content" class="tab-content active mt-6">
+      <label for="text_input" class="text-sm font-medium">Your Text</label>
+      <textarea
+        id="text_input"
+        name="text_input"
+        class="resize-none border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-md border bg-input-background px-3 py-2 text-base mt-2 min-h-[300px] outline-none focus-visible:ring-[3px]"
+        placeholder="Paste your book excerpt here... (minimum 100 words recommended)"
+      >{% if text %}{{ text }}{% endif %}</textarea>
+      <p id="word-count" class="text-muted-foreground mt-2">{% if text %}{{ text|wordcount }}{% else %}0{% endif %} words</p>
+      <button type="submit" class="inline-flex items-center justify-center gap-2 text-sm font-medium transition-all bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-md px-6 w-full mt-4">
+        Analyze Text
+      </button>
+    </section>
+
+    <!-- Upload File Tab -->
+    <section id="upload-content" class="tab-content mt-6 hidden">
+      <div class="border-2 border-dashed border-border rounded-lg p-8 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-upload mx-auto mb-4 text-muted-foreground">
+          <path d="M12 3v12" />
+          <path d="m17 8-5-5-5 5" />
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        </svg>
+        <p class="text-muted-foreground mb-4">Drag and drop your file here or click to browse</p>
+        <input type="file" id="file_input" name="file_input" class="hidden" accept=".txt,.doc,.docx,.pdf" />
+        <label for="file_input" class="inline-flex items-center justify-center gap-2 text-sm font-medium transition-all border bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 cursor-pointer">Choose File</label>
+        <p id="file-name" class="text-muted-foreground mt-2"></p>
+
+        <!-- Submit button for file upload -->
+        <button type="submit" class="inline-flex items-center justify-center gap-2 text-sm font-medium transition-all bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-md px-6 w-full mt-4">
+          Analyze File
+        </button>
+      </div>
+    </section>
+  </form>
+</div>
+
+      {% if results %}
+      <!-- Results -->
+      <section id="results-section" class="space-y-6 {% if results %}block{% else %}hidden{% endif %}">
+        <div class="rounded-xl border bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary text-center py-8">
+          <p class="text-primary-foreground/90 mb-2">Text Complexity</p>
+          <div id="complexity-score" class="text-6xl mb-4">{{ results.0 }}</div>
+          <p class="text-primary-foreground/80">Based on comprehensive readability analysis</p>
+        </div>
+        <div class="space-y-8">
+
+      <!-- Primary Readability Scores -->
+      <div class="space-y-4">
+        <h3 class="text-2xl font-bold text-foreground">Readability Scores</h3>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-card rounded-xl border p-6 space-y-4">
+            <div class="space-y-2">
+              <h4 class="text-xl font-semibold">Flesch Reading Ease Score</h4>
+              <p class="text-muted-foreground text-sm">0-100 scale (higher = easier)</p>
+            </div>
+            <div id="flesch-score" class="text-4xl font-bold text-primary">{{ results.12 }}</div>
+            <div class="space-y-2">
+              <div class="bg-primary/20 h-3 w-full rounded-full overflow-hidden">
+                <div id="flesch-progress" class="bg-primary h-full transition-all duration-500" style="width: 74.9%"></div>
+              </div>
+              <p id="flesch-description" class="text-muted-foreground text-sm">Easy to read</p>
+            </div>
+          </div>
+
+          <div class="bg-card rounded-xl border p-6 space-y-4">
+            <div class="space-y-2">
+              <h4 class="text-xl font-semibold">Dale-Chall Readability Score</h4>
+              <p class="text-muted-foreground text-sm">Grade level difficulty measure</p>
+            </div>
+            <div id="dale-chall-score" class="text-4xl font-bold text-primary">{{ results.13 }}</div>
+            <p id="dale-chall-description" class="text-muted-foreground text-sm">Suitable for grade 16 and above</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Readability Metrics -->
+      <div class="space-y-4">
+        <h3 class="text-2xl font-bold text-foreground">Advanced Readability Metrics</h3>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="bg-card rounded-xl border p-6 space-y-3">
+            <h4 class="text-lg font-semibold">SMOG Index</h4>
+            <p class="text-muted-foreground text-sm">Years of education needed</p>
+            <div id="smog-index" class="text-3xl font-bold text-primary">{{ results.14 }}</div>
+          </div>
+
+          <div class="bg-card rounded-xl border p-6 space-y-3">
+            <h4 class="text-lg font-semibold">Automated Readability</h4>
+            <p class="text-muted-foreground text-sm">US grade level estimate</p>
+            <div id="automated-readability" class="text-3xl font-bold text-primary">{{ results.15 }}</div>
+          </div>
+
+          <div class="bg-card rounded-xl border p-6 space-y-3">
+            <h4 class="text-lg font-semibold">Coleman-Liau Index</h4>
+            <p class="text-muted-foreground text-sm">Grade level based on characters</p>
+            <div id="coleman-liau" class="text-3xl font-bold text-primary">{{ results.16 }}</div>
+          </div>
+
+          <div class="bg-card rounded-xl border p-6 space-y-3">
+            <h4 class="text-lg font-semibold">Gunning Fog Index</h4>
+            <p class="text-muted-foreground text-sm">Years of formal education</p>
+            <div id="gunning-fog" class="text-3xl font-bold text-primary">{{ results.17 }}</div>
+          </div>
+
+          <div class="bg-card rounded-xl border p-6 space-y-3">
+            <h4 class="text-lg font-semibold">Complex Conjunctions</h4>
+            <p class="text-muted-foreground text-sm">Frequency of complex connectors</p>
+            <div id="complex-conjunctions" class="text-3xl font-bold text-primary">{{ results.10 }}%</div>
+          </div>
+        </div>
+      </div>
+
+            <!-- Basic Text Statistics -->
+            <div class="bg-card rounded-xl border p-6 space-y-6">
+              <div class="space-y-2">
+                <h4 class="text-2xl font-semibold">Text Statistics</h4>
+                <p class="text-muted-foreground">Basic metrics about your text</p>
+              </div>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="text-center space-y-2">
+                  <p class="text-muted-foreground text-sm font-medium">Total Words</p>
+                  <p id="total-words" class="text-3xl font-bold text-foreground">{{ results.1 }}</p>
+                </div>
+                <div class="text-center space-y-2">
+                  <p class="text-muted-foreground text-sm font-medium">Sentences</p>
+                  <p id="total-sentences" class="text-3xl font-bold text-foreground">{{ results.2 }}</p>
+                </div>
+                <div class="text-center space-y-2">
+                  <p class="text-muted-foreground text-sm font-medium">Avg Sentence Length</p>
+                  <p id="avg-sentence-length" class="text-3xl font-bold text-foreground"></p>
+                </div>
+                <div class="text-center space-y-2">
+                  <p class="text-muted-foreground text-sm font-medium">Avg Word Length</p>
+                  <p id="avg-word-length" class="text-3xl font-bold text-foreground">{{ results.3 }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Linguistic Metrics -->
+            <div class="bg-card rounded-xl border p-6 space-y-6">
+              <div class="space-y-2">
+                <h4 class="text-2xl font-semibold">Advanced Linguistic Metrics</h4>
+                <p class="text-muted-foreground">Detailed analysis of text complexity</p>
+              </div>
+              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                <div class="text-center space-y-2">
+                  <p class="text-muted-foreground text-sm font-medium">Vocabulary Richness</p>
+                  <p id="vocab-richness" class="text-2xl font-bold text-foreground">{{ results.5 }}%</p>
+                </div>
+                <div class="text-center space-y-2">
+                  <p class="text-muted-foreground text-sm font-medium">Syllables per Word</p>
+                  <p id="syllables-per-word" class="text-2xl font-bold text-foreground">{{ results.6 }}</p>
+                </div>
+                <div class="text-center space-y-2">
+                  <p class="text-muted-foreground text-sm font-medium">Word-Sentence Diff</p>
+                  <p id="word-sentence-diff" class="text-2xl font-bold text-foreground">{{ results.4 }}</p>
+                </div>
+                <div class="text-center space-y-2">
+                  <p class="text-muted-foreground text-sm font-medium">Punctuation Density</p>
+                  <p id="punctuation-density" class="text-2xl font-bold text-foreground">{{ results.11 }}%</p>
+                </div>
+                <div class="text-center space-y-2">
+                  <p class="text-muted-foreground text-sm font-medium">Noun Ratio</p>
+                  <p id="noun-ratio" class="text-2xl font-bold text-foreground">{{ results.7 }}</p>
+                </div>
+                <div class="text-center space-y-2">
+                  <p class="text-muted-foreground text-sm font-medium">Verb Ratio</p>
+                  <p id="verb-ratio" class="text-2xl font-bold text-foreground">{{ results.8 }}</p>
+                </div>
+                <div class="text-center space-y-2">
+                  <p class="text-muted-foreground text-sm font-medium">Adjective Ratio</p>
+                  <p id="adjective-ratio" class="text-2xl font-bold text-foreground">{{ results.9 }}</p>
+                </div>
+                <!--
+                <div class="text-center space-y-2">
+                  <p class="text-muted-foreground text-sm font-medium">Adverb Ratio</p>
+                  <p id="adverb-ratio" class="text-2xl font-bold text-foreground">0.000</p>
+                </div>
+                -->
+              </div>
+            </div>
+          </div>
+
+        <div class="rounded-xl border bg-accent/5 border-accent/20 p-6">
+          <h4 class="text-xl font-semibold">Recommendations</h4>
+          <ul id="recommendations" class="space-y-2 text-muted-foreground mt-2">
+            <li>• Add more text for a more accurate analysis (100+ words recommended)</li>
+            <li>• Great! Your text is easy to read and accessible to a wide audience</li>
+          </ul>
+        </div>
+
+        <div class="flex justify-center">
+          <button id="analyze-another-btn" class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-all border bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">Analyze Another Text</button>
+        </div>
+      </section>
+    </div>
+    {% endif %}
+  </main>
+
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navbar %}
+<nav class="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <a href="{% url 'facts:home' %}" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open h-6 w-6 text-primary">
+                <path d="M12 7v14" />
+                <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+            </svg>
+            <span class="text-primary font-semibold">ReadScore</span>
+        </a>
+        <a href="{% url 'facts:home' %}" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all border bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">Back to Home</a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<main class="container mx-auto px-4 py-12">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold mb-4">About ReadScore</h1>
+            <p class="text-muted-foreground text-lg">Making text complexity analysis accessible and accurate</p>
+        </div>
+
+        <!-- Mission -->
+        <div class="bg-card rounded-xl border p-8 mb-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold mb-4">Our Mission</h2>
+                <p class="text-muted-foreground text-lg">To provide writers, educators, and content creators with powerful tools to understand and optimize text readability for their target audience.</p>
+            </div>
+        </div>
+
+        <!-- Story & Values -->
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+            <div class="bg-card rounded-xl border p-6 space-y-4">
+                <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold">Innovation</h3>
+                <p class="text-muted-foreground">We combine traditional readability formulas with modern AI technology to deliver the most accurate text complexity analysis available.</p>
+            </div>
+
+            <div class="bg-card rounded-xl border p-6 space-y-4">
+                <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold">Accessibility</h3>
+                <p class="text-muted-foreground">Our platform is designed to be user-friendly and accessible to everyone, from professional writers to students and educators.</p>
+            </div>
+        </div>
+
+        <!-- Technology -->
+        <div class="bg-card rounded-xl border p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6">Our Technology</h2>
+            <div class="space-y-6">
+                <div class="space-y-3">
+                    <h3 class="text-xl font-semibold">Advanced Linguistic Analysis</h3>
+                    <p class="text-muted-foreground">ReadScore uses Natural Language Processing (NLP) techniques to analyze multiple aspects of text complexity, including:</p>
+                    <ul class="text-muted-foreground space-y-2 ml-6 list-disc">
+                        <li>Vocabulary complexity and diversity</li>
+                        <li>Sentence structure and length</li>
+                        <li>Part-of-speech distribution</li>
+                        <li>Syllable patterns and word difficulty</li>
+                        <li>Text cohesion and readability indicators</li>
+                    </ul>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-xl font-semibold">Machine Learning Integration</h3>
+                    <p class="text-muted-foreground">Our neural network model is trained on diverse text samples and incorporates multiple readability formulas to provide comprehensive complexity predictions.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team & Contact -->
+        <div class="bg-accent/5 rounded-xl border border-accent/20 p-8 text-center">
+            <h2 class="text-2xl font-bold mb-4">Get In Touch</h2>
+            <p class="text-muted-foreground mb-6">Have questions about ReadScore or want to learn more about our technology?</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{% url 'facts:contact' %}" class="inline-flex items-center justify-center gap-2 text-sm font-medium transition-all bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-6">
+                    Contact Us
+                </a>
+                <a href="{% url 'facts:features' %}" class="inline-flex items-center justify-center gap-2 text-sm font-medium transition-all border bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-6">
+                    View Features
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

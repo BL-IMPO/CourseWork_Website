@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navbar %}
+<nav class="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <a href="{% url 'facts:home' %}" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open h-6 w-6 text-primary">
+                <path d="M12 7v14" />
+                <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+            </svg>
+            <span class="text-primary font-semibold">ReadScore</span>
+        </a>
+        <a href="{% url 'facts:home' %}" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all border bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">Back to Home</a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<main class="container mx-auto px-4 py-12">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold mb-4">Documentation</h1>
+            <p class="text-muted-foreground text-lg">Comprehensive guides and references for using ReadScore</p>
+        </div>
+
+        <!-- Documentation Sections -->
+        <div class="space-y-8">
+            <!-- Getting Started -->
+            <section class="bg-card rounded-xl border p-8">
+                <h2 class="text-2xl font-bold mb-6">Getting Started</h2>
+                <div class="space-y-6">
+                    <div class="space-y-3">
+                        <h3 class="text-xl font-semibold">How to Analyze Text</h3>
+                        <p class="text-muted-foreground">Learn the basic steps to analyze your text using ReadScore:</p>
+                        <ol class="text-muted-foreground space-y-2 ml-6 list-decimal">
+                            <li>Navigate to the Analyze page</li>
+                            <li>Choose between pasting text or uploading a file</li>
+                            <li>For text input: Paste your content in the text area</li>
+                            <li>For file upload: Select your document (TXT, DOC, DOCX, PDF)</li>
+                            <li>Click "Analyze Text" or "Analyze File"</li>
+                            <li>Review your comprehensive readability report</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Readability Formulas -->
+            <section class="bg-card rounded-xl border p-8">
+                <h2 class="text-2xl font-bold mb-6">Readability Formulas Explained</h2>
+                <div class="space-y-6">
+                    <div class="space-y-3">
+                        <h3 class="text-xl font-semibold">Flesch Reading Ease</h3>
+                        <p class="text-muted-foreground">Measures how easy a text is to read. Scores range from 0-100, with higher scores indicating easier reading.</p>
+                        <ul class="text-muted-foreground space-y-1 ml-6 list-disc">
+                            <li>90-100: Very Easy (5th grade)</li>
+                            <li>80-89: Easy (6th grade)</li>
+                            <li>70-79: Fairly Easy (7th grade)</li>
+                            <li>60-69: Standard (8th-9th grade)</li>
+                            <li>50-59: Fairly Difficult (10th-12th grade)</li>
+                            <li>30-49: Difficult (College level)</li>
+                            <li>0-29: Very Difficult (College graduate)</li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h3 class="text-xl font-semibold">Dale-Chall Readability</h3>
+                        <p class="text-muted-foreground">Based on vocabulary familiarity and sentence length. Uses a list of 3,000 familiar words.</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h3 class="text-xl font-semibold">SMOG Index</h3>
+                        <p class="text-muted-foreground">Stands for "Simple Measure of Gobbledygook." Estimates the years of education needed to understand a text.</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h3 class="text-xl font-semibold">Other Formulas</h3>
+                        <p class="text-muted-foreground">We also calculate Automated Readability Index, Coleman-Liau Index, and Gunning Fog Index for comprehensive analysis.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Technical Details -->
+            <section class="bg-card rounded-xl border p-8">
+                <h2 class="text-2xl font-bold mb-6">Technical Details</h2>
+                <div class="space-y-6">
+                    <div class="space-y-3">
+                        <h3 class="text-xl font-semibold">Linguistic Features Analyzed</h3>
+                        <ul class="text-muted-foreground space-y-2 ml-6 list-disc">
+                            <li>Word count and sentence count</li>
+                            <li>Average sentence length</li>
+                            <li>Average word length</li>
+                            <li>Vocabulary richness (unique word ratio)</li>
+                            <li>Syllables per word</li>
+                            <li>Part-of-speech distribution (nouns, verbs, adjectives)</li>
+                            <li>Complex conjunction frequency</li>
+                            <li>Punctuation density</li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h3 class="text-xl font-semibold">AI Model</h3>
+                        <p class="text-muted-foreground">Our neural network model is trained on diverse text samples and uses 16 linguistic features to predict text complexity with high accuracy.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Best Practices -->
+            <section class="bg-card rounded-xl border p-8">
+                <h2 class="text-2xl font-bold mb-6">Best Practices</h2>
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <h4 class="font-semibold">Text Length</h4>
+                        <p class="text-muted-foreground">For most accurate results, use texts with at least 100 words. Very short texts may not provide reliable readability scores.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="font-semibold">Language Support</h4>
+                        <p class="text-muted-foreground">Currently optimized for English text. Performance may vary with other languages.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="font-semibold">File Formats</h4>
+                        <p class="text-muted-foreground">Supported formats: TXT, DOC, DOCX, PDF. Maximum file size: 10MB.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+{% endblock %}

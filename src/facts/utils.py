@@ -14,6 +14,10 @@ from keras.models import load_model
 import joblib
 
 
+# Pre-load CMU dict and stopwords once at module level
+CMU_DICT = cmudict.dict()
+STOP_WORDS = set(stopwords.words('english'))
+
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(CURRENT_DIR, "model")
 
@@ -27,175 +31,136 @@ SCALER_X = joblib.load(SCALER_X_PATH)
 SCALER_Y = joblib.load(SCALER_Y_PATH)
 
 with open(DALE_PATH, "r") as f:
-    DALE = f.readlines()
+    DALE = set(line.strip().lower() for line in f)  # Use set for O(1) lookups
 
 # Test to ensure it runs
-MODEL.predict(np.zeros((1, 16)))
+MODEL.predict(np.zeros((1, 16)), verbose=0)  # Disable verbose
+
 
 class LinguisticMetrics:
     def __init__(self, text):
         self.text = text
-        self.words = word_tokenize(self.text.lower())
-        self.sentences = sent_tokenize(self.text)
+        # Precompute tokens once and reuse
+        self.words = word_tokenize(text.lower())
+        self.sentences = sent_tokenize(text)
+        self.alpha_words = [word for word in self.words if word.isalpha()]
+        self.total_alpha_words = len(self.alpha_words)
+        self.total_words = len(self.words)
+        self.total_sentences = len(self.sentences)
 
-    def total_words(self):
-        #words = word_tokenize(self.text)
-        total_words = len(self.words)
+        # Precompute syllable counts for all words
+        self._syllable_cache = {}
+        self._precompute_syllables()
 
-        return total_words
+    def _precompute_syllables(self):
+        """Precompute syllable counts for all unique words"""
+        unique_words = set(self.alpha_words)
+        for word in unique_words:
+            self._syllable_cache[word] = self._count_syllables_fast(word)
 
-    def total_sen(self):
-        total_sentences = len(self.sentences)
-
-        return total_sentences
-
-    def average_sen_len(self):
-        total_words = 0
-        total_sentences = len(self.sentences)
-
-        for sentence in self.sentences:
-            words = word_tokenize(sentence)
-            total_words += len(words)
-
-        return total_words / total_sentences
-
-    def average_word_len(self):
-        total_length = 0
-        total_words = len(self.words)
-
-        for word in self.words:
-            total_length += len(word)
-
-        return total_length / total_words
-
-    def word_sentence_diff(self):
-        total_words = len(self.words)
-        total_sentences = len(self.sentences)
-
-        return total_words / total_sentences
-
-    def vocabulary_richness(self):
-        words = [word for word in self.words if word.isalpha()]
-
-        if len(words) == 0:
-            return 0
-
-        total_words = len(words)
-        unique_words = len(set(words))
-
-        return unique_words / total_words
-
-    def count_syllables(self, word):
-        """
-        Простой счетчик слогов в английских словах
-        """
+    def _count_syllables_fast(self, word):
+        """Optimized syllable counter"""
         word = word.lower().strip()
         if len(word) <= 3:
             return 1
 
-        # Подсчитаем группы гласных
-        vowels = 'aeiouy'
-        count = 0
+        # Use CMU dict if available, otherwise fallback to regex
+        if word in CMU_DICT:
+            pronunciation = CMU_DICT[word][0]
+            return len([ph for ph in pronunciation if ph[-1].isdigit()])
 
-        # Учитываем исключения
+        # Fast regex-based fallback
+        word = re.sub(r'[^a-z]', '', word)
         if word.endswith('e'):
             word = word[:-1]
 
-        if word.endswith('le') and len(word) > 2:
-            count += 1
+        vowels = re.findall(r'[aeiouy]+', word)
+        return max(1, len(vowels)) if vowels else 1
 
-        # Подсчитаем гласные
-        prev_char_vowel = False
-        for char in word:
-            if char in vowels:
-                if not prev_char_vowel:
-                    count += 1
-                prev_char_vowel = True
-            else:
-                prev_char_vowel = False
+    def total_words(self):
+        return self.total_words
 
-        return max(1, count)
+    def total_sen(self):
+        return self.total_sentences
 
+    def average_sen_len(self):
+        if self.total_sentences == 0:
+            return 0
+        return self.total_words / self.total_sentences
 
-    def count_syllables_cmu(self, word):
-        """
-        Подсчитаем слоги с помощью cmu
-        """
-        cmu_dict = cmudict.dict()
-        word = word.lower()
-        if word in cmu_dict:
-            # Получим произношения для каждого слова
-            pronunciation = cmu_dict[word][0]
-            # Подсчитем гласные в произношении
-            return len([ph for ph in pronunciation if ph[-1].isdigit()])
-        else:
-            # Если не удастся, то вернемся к простой функции
-            return self.count_syllables(word)
+    def average_word_len(self):
+        if not self.words:
+            return 0
+        total_length = sum(len(word) for word in self.words)
+        return total_length / len(self.words)
+
+    def word_sentence_diff(self):
+        if self.total_sentences == 0:
+            return 0
+        return self.total_words / self.total_sentences
+
+    def vocabulary_richness(self):
+        if not self.alpha_words:
+            return 0
+        return len(set(self.alpha_words)) / len(self.alpha_words)
 
     def syllables_per_word_cmu(self):
-        words = re.findall(r'\b[a-zA-Z]+\b', self.text.lower())
-
-        if len(words) == 0:
+        if not self.alpha_words:
             return 0
 
-        total_syllables = sum(self.count_syllables_cmu(word) for word in words)
-        return total_syllables / len(words)
+        # Use precomputed syllable counts
+        total_syllables = sum(self._syllable_cache.get(word, 1) for word in self.alpha_words)
+        return total_syllables / len(self.alpha_words)
 
     def get_pos_ratios(self):
-        """
-        Подсчитывает количество сущ., прил., глаголов относительно количества слов
-        """
-        # получаем только слова
-        words = [word for word in word_tokenize(self.text) if word.isalpha()]
-
-        if not words:
+        if not self.alpha_words:
             return 0.0, 0.0, 0.0
 
-        # Получаем POS теги
-        tags = [tag for _, tag in pos_tag(words)]
+        # Batch POS tagging
+        tags = [tag for _, tag in pos_tag(self.alpha_words)]
 
-        # Подсчитываем количество слов для каждого POS
-        nouns = len([tag for tag in tags if tag.startswith('NN')])
-        verbs = len([tag for tag in tags if tag.startswith('VB')])
-        adjs = len([tag for tag in tags if tag.startswith('JJ')])
+        nouns = verbs = adjs = 0
+        for tag in tags:
+            if tag.startswith('NN'):
+                nouns += 1
+            elif tag.startswith('VB'):
+                verbs += 1
+            elif tag.startswith('JJ'):
+                adjs += 1
 
-        total = len(words)
+        total = len(self.alpha_words)
         return nouns / total, verbs / total, adjs / total
 
     def complex_conjunctions_freq(self):
-        """Часточность сложных союзов в тексте"""
+        if not self.alpha_words:
+            return 0
+
         conjunctions = {'although', 'however', 'nevertheless', 'moreover',
                         'furthermore', 'therefore', 'consequently', 'thus',
                         'hence', 'meanwhile', 'otherwise', 'despite', 'unless'}
 
-        words = word_tokenize(self.text.lower())
-        words = [w for w in words if w.isalpha()]
-
-        if not words:
-            return 0
-
-        conj_count = sum(1 for word in words if word in conjunctions)
-        return conj_count / len(words)
-
+        # Use set intersection for faster counting
+        conj_count = len(conjunctions.intersection(self.alpha_words))
+        return conj_count / len(self.alpha_words)
 
     def punctuation_density(self):
-        """Знаки пунктуации относительно всего текста"""
+        if not self.text:
+            return 0
         punct_marks = len(re.findall(r'[.,;:!?\-—()"\'/]', self.text))
-        return punct_marks / len(self.text) if self.text else 0
-
+        return punct_marks / len(self.text)
 
     def flesch_reading_ease(self):
-        return 206.835 - 1.015 * self.average_sen_len() - 84.6 * self.syllables_per_word_cmu()
+        asl = self.average_sen_len()
+        spw = self.syllables_per_word_cmu()
+        return 206.835 - 1.015 * asl - 84.6 * spw
 
     def dale_chall_readability_score(self):
+        if not self.words:
+            return 0
 
-        difficult_words = 0
-
-        for word in self.words:
-            if word in DALE:
-                difficult_words += 1
-
-        diff_to_normal_words = (difficult_words / len(self.words))  * 100
+        # Use set for O(1) lookups
+        difficult_words = sum(1 for word in self.words if word in DALE)
+        diff_to_normal_words = (difficult_words / len(self.words)) * 100
 
         dale_score = 0.1579 * diff_to_normal_words + 0.0496 * self.word_sentence_diff()
 
@@ -205,25 +170,16 @@ class LinguisticMetrics:
         return dale_score
 
     def smog_index(self):
-
-        if len(self.sentences) == 0:
+        if self.total_sentences == 0:
             return 0
 
-        # Count polysyllabic words (words with 3 or more syllables)
+        # Use precomputed syllable counts
         polysyllabic_count = 0
+        for word in self.alpha_words:
+            if self._syllable_cache.get(word, 1) >= 3:
+                polysyllabic_count += 1
 
-        for sentence in self.sentences:
-            words = word_tokenize(sentence)
-            for word in words:
-                # Clean the word - keep only alphabetic characters
-                clean_word = re.sub(r'[^a-zA-Z]', '', word).lower()
-                if len(clean_word) > 0:
-                    syllable_count = self.count_syllables_cmu(clean_word)
-                    if syllable_count >= 3:
-                        polysyllabic_count += 1
-
-        # Apply SMOG formula
-        sentences_count = min(len(self.sentences), 30)  # SMOG uses exactly 30 sentences
+        sentences_count = min(self.total_sentences, 30)
         if polysyllabic_count == 0:
             return 0
 
@@ -231,77 +187,66 @@ class LinguisticMetrics:
         return round(smog_score, 2)
 
     def automated_readability_index(self):
-        if len(self.words) == 0 or len(self.sentences) == 0:
+        if not self.words or not self.sentences:
             return 0
 
-        # Count total characters (letters only, excluding punctuation and spaces)
-        total_characters = 0
-        for word in self.words:
-            # Count only alphabetic characters in each word
-            total_characters += len(re.findall(r'[a-zA-Z]', word))
+        # Count characters using pre-tokenized words
+        total_characters = sum(len(re.findall(r'[a-zA-Z]', word)) for word in self.words)
 
-        # Calculate ratios
         characters_per_word = total_characters / len(self.words)
         words_per_sentence = len(self.words) / len(self.sentences)
 
-        # Apply ARI formula
         ari_score = (4.71 * characters_per_word) + (0.5 * words_per_sentence) - 21.43
         return round(ari_score, 2)
 
     def coleman_liau_index(self):
-        if len(self.words) == 0:
+        if not self.words:
             return 0
 
-        # Count total characters (letters only, excluding punctuation and spaces)
-        total_characters = 0
-        for word in self.words:
-            # Count only alphabetic characters in each word
-            total_characters += len(re.findall(r'[a-zA-Z]', word))
-
-        # Calculate metrics per 100 words
+        total_characters = sum(len(re.findall(r'[a-zA-Z]', word)) for word in self.words)
         characters_per_100_words = (total_characters / len(self.words)) * 100
-        sentences_per_100_words = (len(self.sentences) / len(self.words)) * 100
+        sentences_per_100_words = (self.total_sentences / len(self.words)) * 100
 
-        # Apply Coleman-Liau formula
         coleman_liau_score = (0.0588 * characters_per_100_words) - (0.296 * sentences_per_100_words) - 15.8
         return round(coleman_liau_score, 2)
 
     def gunning_fog_index(self):
-        if len(self.words) == 0 or len(self.sentences) == 0:
+        if not self.alpha_words or not self.sentences:
             return 0
 
-        # Count complex words (words with 3 or more syllables)
+        # Use precomputed syllable counts
         complex_word_count = 0
-        words = [word for word in self.words if word.isalpha()]
-
-        for word in words:
-            # Skip common exceptions: proper nouns (capitalized), familiar jargon, etc.
-            # For simplicity, we'll count all words with 3+ syllables as complex
-            syllable_count = self.count_syllables_cmu(word)
-            if syllable_count >= 3:
+        for word in self.alpha_words:
+            if self._syllable_cache.get(word, 1) >= 3:
                 complex_word_count += 1
 
-        # Calculate ratios
-        words_per_sentence = len(words) / len(self.sentences)
-        complex_word_percentage = (complex_word_count / len(words)) * 100 if len(words) > 0 else 0
+        words_per_sentence = len(self.alpha_words) / self.total_sentences
+        complex_word_percentage = (complex_word_count / len(self.alpha_words)) * 100
 
-        # Apply Gunning Fog formula
         fog_index = 0.4 * (words_per_sentence + complex_word_percentage)
         return round(fog_index, 2)
 
     def get_all_metrics(self):
-        """
-        Returns all metrics for text
-        """
+        """Returns all metrics for text - optimized to avoid redundant calculations"""
         pos = self.get_pos_ratios()
-        metrics = [self.average_sen_len(), self.average_word_len(), self.word_sentence_diff(),
-                self.vocabulary_richness(), self.syllables_per_word_cmu(),
-                pos[0], pos[1], pos[2],
-                self.complex_conjunctions_freq(), self.punctuation_density(),
-                self.flesch_reading_ease() ,self.dale_chall_readability_score(),
-                self.smog_index(), self.automated_readability_index(),
-                self.coleman_liau_index(), self.gunning_fog_index(),
-                ]
+
+        # Precompute reusable values
+        asl = self.average_sen_len()
+        awl = self.average_word_len()
+        wsd = self.word_sentence_diff()
+        vr = self.vocabulary_richness()
+        spw = self.syllables_per_word_cmu()
+        ccf = self.complex_conjunctions_freq()
+        pd = self.punctuation_density()
+        fre = 206.835 - 1.015 * asl - 84.6 * spw  # Direct calculation
+        dcrs = self.dale_chall_readability_score()
+        si = self.smog_index()
+        ari = self.automated_readability_index()
+        cli = self.coleman_liau_index()
+        gfi = self.gunning_fog_index()
+
+        metrics = [asl, awl, wsd, vr, spw, pos[0], pos[1], pos[2], ccf, pd,
+                   fre, dcrs, si, ari, cli, gfi]
 
         return [round(x, 2) for x in metrics]
 
@@ -314,16 +259,15 @@ class NNPredict:
     def __predict(self):
         metrics = LinguisticMetrics(self.text).get_all_metrics()
 
-        x_predict = np.array(metrics)
-        x_predict = x_predict.reshape(1, -1)
-        x_predict = SCALER_X.fit_transform(x_predict)
+        x_predict = np.array(metrics).reshape(1, -1)
+        x_predict = SCALER_X.transform(x_predict)  # Use transform, not fit_transform
 
-        self.target = SCALER_Y.inverse_transform(MODEL.predict(x_predict))
-        print(self.target)
+        self.target = SCALER_Y.inverse_transform(MODEL.predict(x_predict, verbose=0))
+
     def predict_level(self):
         self.__predict()
 
-        lexile = self.target  # e.g., 750, 950, etc.
+        lexile = self.target[0][0]  # Extract scalar value
         if lexile < 500:
             return "very_easy"
         elif lexile < 800:
@@ -335,12 +279,11 @@ class NNPredict:
 
 
 def run_readability_analysis(text_content):
+    metrics_calculator = LinguisticMetrics(text_content)
     model = NNPredict(text_content)
-    metrics = LinguisticMetrics(text_content)
-    result = [model.predict_level(), metrics.total_words(), metrics.total_sen(), ]
-    metrics = metrics.get_all_metrics()
 
-    for metric in metrics:
-        result.append(metric)
-    print(result)
+    result = [model.predict_level(), metrics_calculator.total_words, metrics_calculator.total_sentences]
+    metrics = metrics_calculator.get_all_metrics()
+
+    result.extend(metrics)
     return result

@@ -37,7 +37,7 @@ A comparative analysis of four machine learning models was conducted. [cite_star
 
 [cite_start]*Results based on the test set[cite: 464, 465].*
 
-## ⚙️ Setup & Installation
+## Setup & Installation
 
 Follow these steps to set up the project locally:
 
